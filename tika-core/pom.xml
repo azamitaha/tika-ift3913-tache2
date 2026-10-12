@@ -300,6 +300,7 @@
           </targetClasses>
           <targetTests>
             <param>org.apache.tika.utils.XMLReaderUtilsTest</param>
+            <param>org.apache.tika.utils.XMLReaderUtilsGeneratedTest</param>
           </targetTests>
           <threads>2</threads>
           <outputFormats>
@@ -315,6 +316,18 @@
           </dependency>
         </dependencies>
       </plugin>
+      <plugin>
+    <groupId>io.github.zju-aces-ise</groupId>
+    <artifactId>chatunitest-maven-plugin</artifactId>
+    <version>2.1.1</version>
+    <configuration>
+        <apiKeys>local</apiKeys>
+        <model>codeqwen:v1.5-chat</model>
+        <url>http://localhost:11434/v1/chat/completions</url>
+        <testNumber>1</testNumber>
+        <maxRounds>1</maxRounds>
+    </configuration>
+    </plugin>
     </plugins>
   </build>
   <reporting>

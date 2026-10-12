@@ -248,3 +248,200 @@ Security
 ========
 
 See [SECURITY.md](SECURITY.md) and https://tika.apache.org/security.html
+---
+
+# IFT3913 — Tâche 2 : Génération de tests avec l'intelligence artificielle
+
+**Équipe :** Taha AZAMI et Nourdin AZAMI  
+**Université :** Université de Montréal  
+**Projet étudié :** Apache Tika — module `tika-core`  
+**Classe étudiée :** `org.apache.tika.utils.XMLReaderUtils`
+
+Ce rapport présente notre analyse des tests existants, l'utilisation
+de ChatUniTest avec un modèle de langage local exécuté par Ollama,
+la correction des tests générés et les résultats de l'analyse de
+mutation réalisée avec PITest.
+
+## 1. Choix de la classe et analyse initiale
+
+Nous avons choisi le projet Apache Tika, plus précisément le module
+`tika-core` et la classe `org.apache.tika.utils.XMLReaderUtils`.
+
+Cette classe fournit des méthodes utilitaires pour manipuler et
+sécuriser les lecteurs et parseurs XML. Nous l'avons sélectionnée
+parce qu'elle possède déjà des tests JUnit, mais que sa couverture
+est inférieure à 100 %. Elle constitue donc un bon cas d'étude pour
+évaluer l'apport de tests générés par intelligence artificielle.
+
+### 1.1 Tests existants
+
+Les tests existants se trouvent dans le fichier :
+
+`tika-core/src/test/java/org/apache/tika/utils/XMLReaderUtilsTest.java`
+
+Avant nos modifications, cette classe de tests contenait 6 tests JUnit.
+
+Nous avons vérifié le fonctionnement du module avec Maven.
+L'exécution initiale des tests de `tika-core` s'est terminée
+avec succès : 746 tests réussis et 3 tests ignorés.
+
+### 1.2 Analyse de mutation initiale
+
+Nous avons utilisé PITest 1.19.1 avec son intégration JUnit 5
+pour analyser la classe `XMLReaderUtils`.
+
+Résultats initiaux :
+
+| Indicateur | Résultat |
+|---|---:|
+| Mutants générés | 181 |
+| Mutants tués | 21 |
+| Score de mutation | 12 % |
+| Mutants sans couverture | 77 |
+| Couverture des lignes | 48 % |
+| Force des tests | 20 % |
+
+Ces résultats montrent que les tests initiaux ne détectent
+qu'une faible proportion des modifications artificielles
+introduites par PITest.
+
+Le rapport HTML initial est conservé dans le dossier
+[`pitest-initial/`](pitest-initial/index.html).
+
+## 2. Génération de tests avec ChatUniTest et Ollama
+
+### 2.1 Configuration
+
+Nous avons intégré le plugin Maven ChatUniTest 2.1.1 au module
+`tika-core` afin de générer des tests JUnit avec un modèle de
+langage exécuté localement.
+
+Notre environnement comprend :
+- Java 17 et Maven Wrapper 3.9.12 ;
+- Ollama 0.40.3 ;
+- le modèle ouvert `qwen2.5-coder:3b` ;
+- ChatUniTest 2.1.1.
+
+ChatUniTest ne reconnaissant pas directement le nom
+`qwen2.5-coder:3b`, nous avons créé l'alias local
+`codeqwen:v1.5-chat` avec la commande :
+
+    ollama cp qwen2.5-coder:3b codeqwen:v1.5-chat
+
+Cet alias désigne le même modèle `qwen2.5-coder:3b`, et non
+un modèle CodeQwen téléchargé séparément.
+
+Le plugin communique avec Ollama à l'adresse locale
+`http://localhost:11434/v1/chat/completions`.
+
+### 2.2 Première génération
+
+Nous avons demandé à ChatUniTest de générer un test pour
+la méthode `XMLReaderUtils.getAttrValue()`.
+
+La génération a duré environ 10 minutes. Le plugin a proposé
+11 méthodes de test, mais le fichier produit n'a pas compilé
+sans intervention humaine.
+
+Nous avons identifié plusieurs problèmes :
+- un import JUnit invalide ;
+- des références à Mockito non résolues ;
+- des appels avec des types de paramètres incorrects ;
+- des assertions ne correspondant pas au comportement réel
+  de la méthode, notamment sur la distinction majuscules/minuscules.
+
+Le message `BUILD SUCCESS` du plugin indiquait seulement que
+la procédure de génération s'était terminée. Il ne signifiait
+pas que le test généré compilait.
+
+### 2.3 Correction et exécution
+
+Nous avons examiné les propositions générées et retenu
+7 scénarios pertinents dans le fichier :
+
+`tika-core/src/test/java/org/apache/tika/utils/XMLReaderUtilsGeneratedTest.java`
+
+Nous avons remplacé les simulations Mockito par des objets
+`AttributesImpl`, corrigé les assertions, supprimé les appels
+invalides et adapté le fichier aux règles Checkstyle du projet
+(en-tête Apache, fins de ligne LF et retour à la ligne final).
+
+Après ces corrections, la commande suivante a réussi :
+
+    mvnw.cmd test -pl tika-core -Dtest=XMLReaderUtilsGeneratedTest
+
+Résultat : **7 tests exécutés, 0 échec, 0 erreur**.
+
+Ces observations montrent que les tests générés peuvent fournir
+des idées de scénarios utiles, mais que leur compilation et la
+validité de leurs oracles doivent être vérifiées manuellement.
+
+## 3. Analyse de mutation et amélioration des tests
+
+### 3.1 Test manuel ajouté
+
+Après l'analyse initiale, nous avons ajouté un test JUnit
+`testGetAttrValue()` dans `XMLReaderUtilsTest.java`.
+
+Ce test vérifie deux situations :
+- lorsqu'un attribut XML nommé `nom` existe, la méthode
+  retourne la valeur attendue `Taha` ;
+- lorsqu'un attribut est absent, la méthode retourne `null`.
+
+Ces assertions constituent des oracles explicites fondés sur
+le comportement attendu de `getAttrValue()`.
+
+Le test manuel a permis de tuer quatre mutants supplémentaires :
+
+| Ligne | Mutateur PITest | Comportement modifié |
+|---|---|---|
+| 1032 | NegateConditionalsMutator | Inversion de la condition de boucle |
+| 1033 | NegateConditionalsMutator | Inversion de la comparaison du nom |
+| 1034 | EmptyObjectReturnValsMutator | Remplacement de la valeur par une chaîne vide |
+| 1037 | EmptyObjectReturnValsMutator | Remplacement de `null` par une chaîne vide |
+
+Le test permet de détecter ces modifications parce qu'il
+vérifie à la fois une valeur présente et une valeur absente.
+
+### 3.2 Comparaison des résultats PITest
+
+| Configuration | Mutants tués | Score | Mutants sans couverture |
+|---|---:|---:|---:|
+| Tests initiaux | 21 / 181 | 12 % | 77 |
+| Tests initiaux et test manuel | 25 / 181 | 14 % | 72 |
+| Tests initiaux, manuel et IA corrigés | 23 / 181 | 13 % | 72 |
+
+Les trois rapports sont conservés dans :
+- [`pitest-initial/`](pitest-initial/index.html)
+- [`pitest-manuel/`](pitest-manuel/index.html)
+- [`pitest-combine/`](pitest-combine/index.html)
+
+Nous avons répété l'analyse combinée et obtenu deux fois
+23 mutants tués sur 181.
+
+Deux mutants auparavant tués sont devenus survivants :
+- `getDocumentBuilder()`, ligne 290 : retour remplacé par `null` ;
+- `getDocumentBuilderFactory()`, ligne 271 : retour remplacé par `null`.
+
+La cause exacte de cette variation n'a pas été établie.
+Nous ne pouvons donc pas affirmer que les tests générés
+ont provoqué cette diminution.
+
+Les sept tests IA corrigés passent tous avec JUnit.
+Cependant, ils n'ont pas démontré de gain supplémentaire
+de mutation dans notre analyse combinée.
+
+### 3.3 Mutants survivants et limites
+
+Un mutant de `getAttrValue()` à la ligne 1032,
+produit par `ConditionalsBoundaryMutator`, demeure survivant.
+
+Ce mutant modifie la condition limite d'une boucle.
+Il illustre une limite de nos tests : une modification
+interne peut ne pas produire de différence observable
+dans les résultats vérifiés.
+
+D'autres mutants de `XMLReaderUtils` restent sans couverture,
+notamment dans certaines méthodes de construction et de
+configuration des parseurs XML. Nous avons concentré nos
+corrections sur `getAttr
