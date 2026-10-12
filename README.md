@@ -445,3 +445,17 @@ D'autres mutants de `XMLReaderUtils` restent sans couverture,
 notamment dans certaines méthodes de construction et de
 configuration des parseurs XML. Nous avons concentré nos
 corrections sur `getAttr
+
+## 4. Liens vers le travail réalisé
+
+**Dépôt GitHub du binôme :**  
+https://github.com/azamitaha/tika-ift3913-tache2/tree/tache2-tests
+
+**Rapport complet (README) :**  
+https://github.com/azamitaha/tika-ift3913-tache2/blob/tache2-tests/README.md
+
+**Code des tests générés avec ChatUniTest et corrigés :**  
+[tika-core/src/test/java/org/apache/tika/utils/XMLReaderUtilsGeneratedTest.java](tika-core/src/test/java/org/apache/tika/utils/XMLReaderUtilsGeneratedTest.java)
+
+**Code des tests existants et du test manuel :**  
+[tika-core/src/test/java/org/apache/tika/utils/XMLReaderUtilsTest.java](tika-core/src/test/java/org/apache/tika/utils/XMLReaderUtilsTest.java)
