@@ -34,6 +34,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.AttributesImpl;
 
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.sax.ToTextContentHandler;
@@ -250,5 +251,23 @@ public class XMLReaderUtilsTest {
             return;
         }
         throw e;
+    }
+    /**
+     * Vérifie que la méthode getAttrValue() retourne la valeur d'un
+     * attribut XML lorsqu'il existe et null lorsqu'il est absent.
+     *
+     * Le test utilise un attribut nommé "nom" contenant la valeur "Taha".
+     * Les assertions vérifient les deux résultats attendus.
+     *
+     * Ce test vise à améliorer la couverture d'une méthode qui
+     * n'était pas exercée par les tests initiaux.
+     */
+    @Test
+    public void testGetAttrValue() {
+        AttributesImpl attributs = new AttributesImpl();
+        attributs.addAttribute("", "nom", "nom", "CDATA", "Taha");
+
+        assertEquals("Taha", XMLReaderUtils.getAttrValue("nom", attributs));
+        assertEquals(null, XMLReaderUtils.getAttrValue("inexistant", attributs));
     }
 }
