@@ -253,6 +253,53 @@ Les sept tests IA corrigés passent tous avec JUnit.
 Cependant, ils n'ont pas démontré de gain supplémentaire
 de mutation dans notre analyse combinée.
 
+### Comparaison qualitative des oracles IA et manuels
+
+Les sept tests générés par ChatUniTest puis corrigés utilisent
+principalement `assertEquals()` et `assertNull()` pour vérifier
+les valeurs retournées par `getAttrValue()`.
+
+**Pertinence des oracles IA :**
+Les tests vérifient correctement plusieurs comportements de base :
+attribut présent, attribut absent, respect de la casse et valeur nulle.
+Leurs assertions sont précises, car elles comparent le résultat à
+une valeur attendue plutôt que de simplement vérifier l'absence
+d'exception.
+
+Cependant, ces scénarios restent simples. Ils utilisent au maximum
+deux attributs et ne vérifient pas la recherche d'un attribut situé
+au milieu ou à la fin d'une liste plus longue.
+Plusieurs tests vérifient des situations similaires de retour `null`.
+Le test `testValeurNulle()` utilise également un attribut dont la
+valeur est `null`, un cas peu représentatif des documents XML habituels.
+
+**Fiabilité des oracles IA :**
+La première génération contenait notamment une hypothèse incorrecte
+concernant la sensibilité aux majuscules et minuscules.
+Nous avons corrigé cette assertion après avoir examiné le comportement
+réel de `getAttrValue()`. Cela montre qu'un oracle généré par IA
+ne doit pas être accepté sans vérification humaine.
+
+**Comparaison avec les oracles manuels :**
+Le test manuel `testGetAttrValue()` vérifie lui aussi des
+comportements simples : une valeur présente et un attribut absent.
+Ses oracles sont donc proches de ceux des tests IA.
+
+Le deuxième test manuel, `testGetAttrValueAvecEspaceDeNoms()`,
+explore un cas différent : la distinction entre le nom local
+`identifiant` et le nom qualifié `ex:identifiant`.
+Aucun des sept tests IA retenus ne vérifie cette distinction.
+L'oracle de ce test provient de l'examen du code de la méthode :
+il caractérise son comportement actuel plutôt que de démontrer
+à lui seul une exigence fonctionnelle indépendante.
+
+**Conclusion :**
+Les oracles IA corrigés sont pertinents pour détecter certaines
+erreurs simples, comme le confirment les quatre mutants tués.
+Ils restent toutefois peu variés et nécessitent une validation
+humaine. Les tests manuels permettent de compléter ces scénarios,
+notamment avec les espaces de noms XML.
+
 ### 3.3 Mutants survivants et limites
 
 Un mutant de `getAttrValue()` à la ligne 1032,
@@ -270,6 +317,16 @@ Nous avons concentré nos corrections sur la méthode
 `getAttrValue()`. Les autres méthodes de `XMLReaderUtils`
 présentent encore des mutants survivants ou sans couverture ;
 leur analyse constitue une limite de notre étude.
+
+### 3.4 Déclaration d'utilisation de l'intelligence artificielle
+
+Nous avons utilisé ChatUniTest avec le modèle local Qwen2.5-Coder 3B, exécuté via Ollama, pour générer des propositions de tests JUnit.
+
+Nous avons ensuite examiné les tests générés, corrigé les erreurs et vérifié leur fonctionnement avec Maven et JUnit.
+
+Nous avons également consulté ChatGPT comme outil d'assistance pour obtenir des explications techniques, comprendre certaines erreurs et clarifier la présentation de nos analyses.
+
+La configuration du projet, les modifications du code, l'exécution des tests, l'analyse des rapports PITest et la validation des résultats ont été réalisées et vérifiées par notre binôme, avec l'aide ponctuelle de ces outils.
 
 ## 4. Liens vers le travail réalisé
 
