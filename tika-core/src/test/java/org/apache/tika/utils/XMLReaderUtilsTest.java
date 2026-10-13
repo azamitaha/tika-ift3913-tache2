@@ -50,6 +50,14 @@ import org.apache.tika.sax.ToTextContentHandler;
  */
 public class XMLReaderUtilsTest {
 
+    // Test manuel : verifier que les DTD sont desactivees.
+    @Test
+    public void testStaxDTDDesactivee() {
+        XMLInputFactory factory = XMLReaderUtils.getXMLInputFactory();
+
+        assertEquals(false, factory.getProperty(XMLInputFactory.SUPPORT_DTD));
+    }
+
     private static final Locale defaultLocale = Locale.getDefault();
     static {
         //tests on content of Exception msgs require specifying locale.

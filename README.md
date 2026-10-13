@@ -180,6 +180,25 @@ reste de 23 mutants tués sur 181.
 Ce test apporte donc une vérification fonctionnelle supplémentaire,
 sans gain de mutation mesuré.
 
+#### Troisième test manuel : désactivation des DTD
+
+Nous avons ajouté `testStaxDTDDesactivee()` dans `XMLReaderUtilsTest.java`
+pour détecter un mutant survivant de la méthode `getXMLInputFactory()`.
+
+Ce test vérifie que la propriété `XMLInputFactory.SUPPORT_DTD` vaut `false`.
+Cette valeur est attendue car la méthode désactive explicitement les DTD
+pour renforcer la sécurité du traitement XML.
+
+Le mutant de la ligne 317, produit par `VoidMethodCallMutator`, supprime
+l'appel qui désactive cette propriété. Le test détecte cette modification
+car la valeur retournée ne correspond plus à `false`.
+
+PITest confirme que ce mutant est passé de `SURVIVED` à `KILLED`,
+avec `testStaxDTDDesactivee()` comme test responsable.
+
+Après cet ajout, le rapport final indique 25 mutants tués sur 181
+(14 %), contre 23 sur 181 (13 %) dans la configuration combinée précédente.
+
 ### 3.2 Comparaison des résultats PITest
 
 | Configuration | Mutants tués | Score | Mutants sans couverture |
@@ -189,6 +208,7 @@ sans gain de mutation mesuré.
 | Tests initiaux, manuel et IA corrigés | 23 / 181 | 13 % | 72 |
 | Tests IA seuls (ChatUniTest corrigés) | 4 / 181 | 2 % | 126 |
 | Tests initiaux + 7 tests IA (sans tests manuels) | 23 / 181 | 13 % | 72 |
+| Tests initiaux + IA + 3 tests manuels (configuration finale) | 25 / 181 | 14 % | 72 |
 
 ### Mutants détectés par les tests IA seuls
 
@@ -239,6 +259,7 @@ tués sur 181) a été obtenu lors d'une exécution séparée de PITest.
 - [`pitest-manuel/`](pitest-manuel/index.html)
 - [`pitest-combine/`](pitest-combine/index.html)
 - [`pitest-originaux-ia/`](pitest-originaux-ia/index.html)
+- [`pitest-final/`](pitest-final/index.html)
 
 Nous avons répété l'analyse combinée et obtenu deux fois
 23 mutants tués sur 181.
