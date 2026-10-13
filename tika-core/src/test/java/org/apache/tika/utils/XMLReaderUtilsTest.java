@@ -102,6 +102,21 @@ public class XMLReaderUtilsTest {
         Locale.setDefault(defaultLocale);
     }
 
+    // Test manuel : verifier les attributs XML avec espace de noms.
+    @Test
+    public void testGetAttrValueAvecEspaceDeNoms() {
+        AttributesImpl attributs = new AttributesImpl();
+        attributs.addAttribute(
+                "urn:exemple", "identifiant",
+                "ex:identifiant", "CDATA", "42");
+    
+        assertEquals("42",
+                XMLReaderUtils.getAttrValue("identifiant", attributs));
+    
+        assertEquals(null,
+                XMLReaderUtils.getAttrValue("ex:identifiant", attributs));
+    }
+
     //make sure that parseSAX actually defends against external entities
     @Test
     public void testSAX() throws Exception {
