@@ -188,6 +188,7 @@ sans gain de mutation mesuré.
 | Tests initiaux et test manuel | 25 / 181 | 14 % | 72 |
 | Tests initiaux, manuel et IA corrigés | 23 / 181 | 13 % | 72 |
 | Tests IA seuls (ChatUniTest corrigés) | 4 / 181 | 2 % | 126 |
+| Tests initiaux + 7 tests IA (sans tests manuels) | 23 / 181 | 13 % | 72 |
 
 ### Mutants détectés par les tests IA seuls
 
@@ -237,6 +238,7 @@ tués sur 181) a été obtenu lors d'une exécution séparée de PITest.
 - [`pitest-initial/`](pitest-initial/index.html)
 - [`pitest-manuel/`](pitest-manuel/index.html)
 - [`pitest-combine/`](pitest-combine/index.html)
+- [`pitest-originaux-ia/`](pitest-originaux-ia/index.html)
 
 Nous avons répété l'analyse combinée et obtenu deux fois
 23 mutants tués sur 181.
@@ -244,6 +246,8 @@ Nous avons répété l'analyse combinée et obtenu deux fois
 Deux mutants auparavant tués sont devenus survivants :
 - `getDocumentBuilder()`, ligne 290 : retour remplacé par `null` ;
 - `getDocumentBuilderFactory()`, ligne 271 : retour remplacé par `null`.
+
+L'analyse des journaux PITest avec `-Dverbose=true` montre que, pour les mutants des lignes 271 et 290, seul le test IA `testRespectDeLaCasse()` est sélectionné. Dans le rapport initial, ces deux mutants étaient tués par le test original `testDOM()`. Ce dernier passe toujours dans JUnit, mais PITest ne le sélectionne pas pour ces mutations lorsque les tests IA sont présents. La raison de ce changement de sélection reste inconnue.
 
 La cause exacte de cette variation n'a pas été établie.
 Nous ne pouvons donc pas affirmer que les tests générés
