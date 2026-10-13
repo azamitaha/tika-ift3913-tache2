@@ -151,6 +151,35 @@ Le test manuel a permis de tuer quatre mutants supplémentaires :
 Le test permet de détecter ces modifications parce qu'il
 vérifie à la fois une valeur présente et une valeur absente.
 
+#### Deuxième test manuel : attribut XML avec espace de noms
+
+Nous avons également ajouté le test
+`testGetAttrValueAvecEspaceDeNoms()` dans `XMLReaderUtilsTest.java`.
+
+Ce test vérifie le comportement de `getAttrValue()` lorsqu'un
+attribut XML possède un espace de noms et un préfixe.
+
+Nous avons créé un attribut avec :
+- l'URI d'espace de noms `urn:exemple` ;
+- le nom local `identifiant` ;
+- le nom qualifié `ex:identifiant` ;
+- la valeur `42`.
+
+Le premier oracle vérifie que la recherche par le nom local
+`identifiant` retourne bien `42`.
+
+Le deuxième oracle vérifie que la recherche par le nom qualifié
+`ex:identifiant` retourne `null`, car la méthode compare les noms
+locaux des attributs.
+
+Ce test a été exécuté avec succès dans Maven et GitHub Actions.
+Cependant, notre nouvelle exécution de PITest n'a pas montré
+d'augmentation du nombre de mutants tués : le résultat combiné
+reste de 23 mutants tués sur 181.
+
+Ce test apporte donc une vérification fonctionnelle supplémentaire,
+sans gain de mutation mesuré.
+
 ### 3.2 Comparaison des résultats PITest
 
 | Configuration | Mutants tués | Score | Mutants sans couverture |
@@ -159,6 +188,28 @@ vérifie à la fois une valeur présente et une valeur absente.
 | Tests initiaux et test manuel | 25 / 181 | 14 % | 72 |
 | Tests initiaux, manuel et IA corrigés | 23 / 181 | 13 % | 72 |
 | Tests IA seuls (ChatUniTest corrigés) | 4 / 181 | 2 % | 126 |
+
+### Mutants détectés par les tests IA seuls
+
+L'analyse PITest exécutée uniquement avec les sept tests
+ChatUniTest corrigés a permis de tuer 4 mutants sur 181.
+Ces quatre mutants concernent la méthode `getAttrValue()`.
+
+| Ligne | Mutateur | Test IA responsable | Explication |
+|---|---|---|---|
+| 1032 | `NegateConditionalsMutator` | `testValeurNumeriqueSousFormeDeTexte()` | L'inversion de la condition de boucle empêche d'obtenir la valeur attendue `123`. |
+| 1033 | `NegateConditionalsMutator` | `testNomDifferent()` | L'inversion de la comparaison peut retourner une valeur alors que le nom recherché est absent. |
+| 1034 | `EmptyObjectReturnValsMutator` | `testValeurNumeriqueSousFormeDeTexte()` | Le mutant remplace `123` par une chaîne vide, ce qui fait échouer `assertEquals()`. |
+| 1037 | `EmptyObjectReturnValsMutator` | `testAucunAttribut()` | Le mutant remplace `null` par une chaîne vide, ce qui fait échouer `assertNull()`. |
+
+Les quatre mutants détectés par les tests IA seuls sont
+également détectés par le test manuel `testGetAttrValue()`.
+Les oracles IA sont donc capables de détecter ces défauts,
+mais ils n'apportent pas de gain supplémentaire de mutation
+mesuré par rapport au test manuel.
+
+Le rapport complet de cette exécution est disponible dans
+[`pitest-ia-seuls/`](pitest-ia-seuls/index.html).
 
 ### Interprétation de l'apport des tests IA
 
